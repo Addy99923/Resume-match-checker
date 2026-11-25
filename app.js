@@ -1,0 +1,10 @@
+const $=id=>document.getElementById(id);
+const stopWords=new Set(('a an and are as at be by can candidate for from has have in is it its of on or our should the their this to with will you your years year experience work working knowledge ability strong good required preferred including using').split(' '));
+const categories={Languages:['java','python','javascript','typescript','sql','c++'],Frameworks:['spring boot','spring','react','angular','node.js'],Tools:['git','github','postman','docker','kubernetes','excel','power bi'],Concepts:['rest api','api','oops','object oriented programming','data structures','algorithms','dbms','networking','cloud','agile','testing','html','css','mysql','mongodb']};
+function words(text){return text.toLowerCase().match(/[a-z][a-z0-9+#.]{1,}/g)||[]}
+function extract(job){let text=job.toLowerCase(),found=new Set();Object.values(categories).flat().forEach(k=>{if(text.includes(k))found.add(k)});words(job).forEach(w=>{if(!stopWords.has(w)&&w.length>2)found.add(w)});return [...found]}
+function renderChips(id,items,missing=false){$(id).innerHTML=items.length?items.map(x=>`<span class="chip ${missing?'missing':''}">${x}</span>`).join(''):'<span class="note">None found</span>'}
+$('analyze').onclick=()=>{let resume=$('resume').value.trim(),job=$('job').value.trim();$('error').textContent='';if(!resume||!job){$('error').textContent='Paste both resume text and job description first.';return}
+let required=extract(job),resumeText=resume.toLowerCase();let matched=required.filter(k=>resumeText.includes(k)),missing=required.filter(k=>!resumeText.includes(k));let pct=required.length?Math.round(matched.length/required.length*100):0;
+$('percentage').textContent=pct+'%';$('bar').style.width=pct+'%';$('summary').textContent=`Found ${matched.length} of ${required.length} extracted keywords.`;renderChips('matched',matched);renderChips('missing',missing,true);$('result').classList.remove('hidden')};
+$('clear').onclick=()=>{$('resume').value='';$('job').value='';$('result').classList.add('hidden');$('error').textContent=''};
